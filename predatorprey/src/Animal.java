@@ -5,7 +5,8 @@
  */
 public abstract class Animal {
 	private int energy;
-	
+	private int x, y; // To keep track of the animal's location internally
+		
 	public Animal() {
 		energy = 100;
 	}
@@ -14,8 +15,33 @@ public abstract class Animal {
 		return energy;
 	}
 	
-	/**
-	 * 
-	 */
+	public void setEnergy(int energy) {
+		this.energy = energy; 
+	}
+	
+	public int getX() {
+		return x;
+	}
+	
+	public void setX(int x) {
+		this.x = x;
+	}
+	
+	public int getY() {
+		return y;
+	}
+	
+	public void setY(int y) {
+		this.y = y;
+	}
+
 	abstract public void turn();
+	
+	public void die() {
+		Main.forest.removeAnimal(x, y);
+	}
+	
+	public void procreate() {
+		// TODO implement
+	}
 }
