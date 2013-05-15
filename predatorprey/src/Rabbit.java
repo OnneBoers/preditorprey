@@ -4,9 +4,18 @@
  *
  */
 public class Rabbit extends Prey {
+	public final static int RABBIT_ENERGY = 50;
+	@SuppressWarnings("unused")
+	private final String PRINT_CHARACTER = "R";
+	
 	public Rabbit() {
 		super();
-		setEnergy(50);
+		setEnergy(RABBIT_ENERGY);
+	}
+	
+	public Rabbit(int x, int y) {
+		super (x, y);
+		setEnergy(RABBIT_ENERGY);
 	}
 	
 	public void turn() {
@@ -34,5 +43,9 @@ public class Rabbit extends Prey {
 	@Override
 	public String toString() {
 		return "Rabbit(" + getX() + ", " + getY() + "): " + getEnergy();
+	}
+	
+	public String printCharacter() {
+		return "R";
 	}
 }

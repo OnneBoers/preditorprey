@@ -4,5 +4,11 @@
  * @see Predator
  */
 public abstract class Prey extends Animal {
-
+	public Prey() {
+		super();
+	}
+	
+	public Prey(int x, int y) {
+		super(x, y);
+	}
 }

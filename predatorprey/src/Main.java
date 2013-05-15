@@ -8,7 +8,9 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO read settings from file
 		
-		Main.forest = new Forest(10, 10);
+		Main.forest = new Forest(10, 10, -1);
+		Main.forest.generateInitialForest();
+		Main.forest.printMap();
 		Main.forest.startSimulation(50);
 	}
 

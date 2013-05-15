@@ -5,10 +5,15 @@
  */
 public abstract class Animal {
 	private int energy;
-	private int x, y; // To keep track of the animal's location internally
+	protected int x, y; // To keep track of the animal's location internally
 		
 	public Animal() {
 		energy = 100;
+	}
+	
+	public Animal(int x, int y) {
+		this.x = x;
+		this.y = y;
 	}
 	
 	public int getEnergy() {
@@ -44,4 +49,6 @@ public abstract class Animal {
 	public void procreate() {
 		// TODO implement
 	}
+	
+	public abstract String printCharacter();
 }

@@ -15,19 +15,21 @@ public class Forest {
 	 */
 	private Animal[][] newGrid;
 	private int gridWidth, gridHeight;
+	private WeightedRandom random;
 	
 	/**
 	 * @param width The width of the forest in squares. One square per animal.
 	 * @param height The height of the forest in squares. One square per animal.
 	 */
-	public Forest(int width, int height) {
+	public Forest(int width, int height, long seed) {
 		gridWidth = width;
 		gridHeight = height;
 		grid = new Animal[width][height];
+		random = new WeightedRandom(seed);
 	}
 	
 	public Forest() {
-		this(20, 20);
+		this(20, 20, 0);
 	}
 	
 	public Animal[][] getGrid() {
@@ -131,33 +133,44 @@ public class Forest {
 	}
 	
 	public void generateInitialForest() {
-		// TODO implement
+		int x, y;
+		Animal tmp;
+		
+		setAnimalWeights();
+		
+		for (y=0; y<getGridHeight(); ++y) {
+			for (x=0; x<getGridWidth(); ++x) {
+				tmp = random.nextAnimal();
+				
+				if (tmp instanceof Rabbit) {
+					grid[x][y] = new Rabbit(x, y);
+				}
+			}
+		}
+	}
+	
+	private void setAnimalWeights() {
+		random.addWeight(5, null);
+		random.addWeight(1, new Rabbit());
 	}
 	
 	public void startSimulation(int maxIterations) {
-		System.out.println("--- Starting simulation ---");
+		System.out.println("--- STARTING SIMULATION ---");
 		for (int i=1; i<=maxIterations; ++i) {
-			System.out.println("Iteration " + i + ":");
+			System.out.println("---ITERATION " + i + "---");
 			
 			newGrid = new Animal[gridWidth][gridHeight];
 			
 			// First do all the stuff that does not involve moving
 			for (Animal[] y : grid) {
 				for (Animal x : y) {
-					x.turn();
 					try {
+						x.turn();
 						setAnimal(x);
 					} catch (IllegalArgumentException e) {
 						System.out.println("Fatal error occured, an animal is not an animal!");
-					}
-				}
-			}
-			
-			// Last animals should move to new positions if they are able to (and want to)
-			for (Animal[] y : grid) {
-				for (Animal x : y) {
-					if (x instanceof MovableAnimal) {
-						// TODO implement
+					} catch (NullPointerException e) {
+						// There is no animal in this spot (x.turn() fails), just do nothing but stop the crash
 					}
 				}
 			}
@@ -179,5 +192,17 @@ public class Forest {
 			System.out.print("\n");
 		}
 		return ret;
+	}
+	
+	public void printMap() {
+		for(Animal[] y : grid) {
+			for(Animal x : y) {
+				if (x == null)
+					System.out.print("_");
+				else
+					System.out.print(x.printCharacter());
+			}
+			System.out.print("\n");
+		}
 	}
 }
