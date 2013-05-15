@@ -104,9 +104,9 @@ public class Forest {
 	 * @param oldY Old Y coordinate
 	 * @param newX New X coordinate
 	 * @param newY New Y coordinate
-	 * @throws IllegalStateException The animal at this location can not move
+	 * @throws UnsupportedOperationException The animal at this location can not move
 	 */
-	public void moveAnimal(int oldX, int oldY, int newX, int newY) throws IllegalStateException {
+	public void moveAnimal(int oldX, int oldY, int newX, int newY) throws UnsupportedOperationException {
 		oldX = getPositionX(oldX);
 		oldY = getPositionY(oldY);
 		newX = getPositionX(newX);
@@ -118,7 +118,7 @@ public class Forest {
 			// TODO cast to appropriate animal type and call the move function
 			//grid[newX][newY].move(newX, newY);
 		} else {
-			throw new IllegalStateException();
+			throw new UnsupportedOperationException();
 		}
 	}
 	
@@ -166,7 +166,9 @@ public class Forest {
 				for (Animal x : y) {
 					try {
 						x.turn();
-						setAnimal(x);
+						if (!x.isDead()) {
+							setAnimal(x);
+						}
 					} catch (IllegalArgumentException e) {
 						System.out.println("Fatal error occured, an animal is not an animal!");
 					} catch (NullPointerException e) {
@@ -176,6 +178,7 @@ public class Forest {
 			}
 			
 			grid = newGrid; // Finally move update the grid
+			printMap();
 		}
 	}
 	

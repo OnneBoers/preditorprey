@@ -6,12 +6,15 @@
 public abstract class Animal {
 	private int energy;
 	protected int x, y; // To keep track of the animal's location internally
+	Boolean dead;
 		
 	public Animal() {
 		energy = 100;
+		dead = false;
 	}
 	
 	public Animal(int x, int y) {
+		this();
 		this.x = x;
 		this.y = y;
 	}
@@ -40,10 +43,15 @@ public abstract class Animal {
 		this.y = y;
 	}
 
+	public Boolean isDead() {
+		return dead;
+	}
+	
 	abstract public void turn();
 	
 	public void die() {
 		Main.forest.removeAnimal(x, y);
+		dead = true;
 	}
 	
 	public void procreate() {

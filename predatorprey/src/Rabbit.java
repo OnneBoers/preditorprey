@@ -20,12 +20,11 @@ public class Rabbit extends Prey {
 	
 	public void turn() {
 		Boolean lonely = true; 
-		
+		Animal[] surrounding = Main.forest.getSurroundingAnimals(getX(), getY());
 		// Check if the animal is lonely (there are no other rabbits surrounding it)
-		for(Animal a : Main.forest.getSurroundingAnimals(getX(), getY())) {
+		for(Animal a : surrounding) {
 			if (a instanceof Rabbit) {
 				lonely = false;
-				break;
 			}
 		}
 		if (lonely)
