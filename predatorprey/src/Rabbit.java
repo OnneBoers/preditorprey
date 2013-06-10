@@ -4,18 +4,20 @@
  *
  */
 public class Rabbit extends Prey {
-	public final static int RABBIT_ENERGY = 50;
-	@SuppressWarnings("unused")
-	private final String PRINT_CHARACTER = "R";
+	public final static int RABBIT_ENERGY = 10;
+	public final static int RABBIT_ENERGY_DIST = 5;
+	public final static int RABBIT_MAX_PROCREATION_COUNT = 4;
+	
+	private int procreationCount = 0;
 	
 	public Rabbit() {
 		super();
-		setEnergy(RABBIT_ENERGY);
+		setEnergy(RABBIT_ENERGY + Main.forest.getRandom().nextInt(RABBIT_ENERGY_DIST));
 	}
 	
 	public Rabbit(int x, int y) {
 		super (x, y);
-		setEnergy(RABBIT_ENERGY);
+		setEnergy(RABBIT_ENERGY + Main.forest.getRandom().nextInt(RABBIT_ENERGY_DIST));
 	}
 	
 	public void turn() {
@@ -29,14 +31,12 @@ public class Rabbit extends Prey {
 		}
 		if (lonely)
 			die();
-		else
-			procreate();
+		else if (procreationCount <= RABBIT_MAX_PROCREATION_COUNT) {
+			if (procreate())
+				procreationCount++;
+		}
 		
-		// Finally lower the energy
-		setEnergy(getEnergy()-1);
-		// If the animal runs out of energy it should die
-		if (getEnergy() == 0)
-			die();
+		lowerEnergy();
 	}
 	
 	@Override

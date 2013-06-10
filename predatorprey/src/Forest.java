@@ -16,6 +16,10 @@ public class Forest {
 	private Animal[][] newGrid;
 	private int gridWidth, gridHeight;
 	private WeightedRandom random;
+	private int rabbitCount=0;
+	private int foxCount=0;
+	private int mouseCount=0;
+	private int hawkCount=0;
 	
 	/**
 	 * @param width The width of the forest in squares. One square per animal.
@@ -72,6 +76,36 @@ public class Forest {
 		return ret;
 	}
 	
+	/**
+	 * Converts an index suitable for the array returned by {@link #getSurroundingAnimals(int, int)} back to the x, y location on the map
+	 * @param idx The index
+	 * @param x The X of the centre
+	 * @param y The Y of the centre
+	 * @return The x, y location in an array. Index 0 is the x coordinate, 1 is the y coordinate
+	 * @throws IllegalArgumentException when the index is out of bounds
+	 */
+	public int[] surroundingAnimalIndexToGridLocation(int idx, int x, int y) throws IllegalArgumentException {
+		int[] ret = {getPositionX(x), getPositionY(y)};
+		
+		if (idx < 0 || idx > 7) {
+			throw new IllegalArgumentException("Index out of range");
+		}
+		
+		if (idx == 0 || idx == 3 || idx == 5) {
+			ret[0] = getPositionX(ret[0]-1);
+		} else if (idx == 2 || idx == 4 || idx == 7) {
+			ret[0] = getPositionX(ret[0]+1);
+		}
+		
+		if(idx <= 2) {
+			ret[1] = getPositionY(ret[1]-1);
+		} else if (idx >= 5) {
+			ret[1] = getPositionY(ret[1]+1);
+		}
+		
+		return ret;
+	}
+	
 	public int getGridWidth() {
 		return gridWidth;
 	}
@@ -80,6 +114,10 @@ public class Forest {
 		return gridHeight;
 	}
 	
+	public WeightedRandom getRandom() {
+		return random;
+	}
+		
 	/**
 	 * Helper function which calculates the correct X location based on the input
 	 * @param x The raw X input
@@ -106,20 +144,29 @@ public class Forest {
 	 * @param newY New Y coordinate
 	 * @throws UnsupportedOperationException The animal at this location can not move
 	 */
-	public void moveAnimal(int oldX, int oldY, int newX, int newY) throws UnsupportedOperationException {
+	public boolean moveAnimal(int oldX, int oldY, int newX, int newY) throws UnsupportedOperationException {
 		oldX = getPositionX(oldX);
 		oldY = getPositionY(oldY);
 		newX = getPositionX(newX);
 		newY = getPositionY(newY);
 		
 		if (grid[oldX][oldY] instanceof MovableAnimal) {
-			newGrid[newX][newY] = grid[oldX][oldY];
-			newGrid[oldX][oldY] = null;
-			// TODO cast to appropriate animal type and call the move function
-			//grid[newX][newY].move(newX, newY);
+			if (newGrid[newX][newY] == null && grid[newX][newY] == null) { // Check whether the new space is not occupied
+				newGrid[newX][newY] = getAnimalAtPosition(oldX, oldY);
+				newGrid[oldX][oldY] = null;
+
+				if (newGrid[newX][newY] instanceof Mouse) {
+					((Mouse)newGrid[newX][newY]).move(newX, newY);
+				} else if (newGrid[newX][newY] instanceof Hawk) {
+					((Hawk)newGrid[newX][newY]).move(newX,  newY);
+				}
+				
+				return true;
+			}
 		} else {
 			throw new UnsupportedOperationException();
 		}
+		return false;
 	}
 	
 	public void removeAnimal(int x, int y) {
@@ -144,20 +191,30 @@ public class Forest {
 				
 				if (tmp instanceof Rabbit) {
 					grid[x][y] = new Rabbit(x, y);
+				} else if (tmp instanceof Fox) {
+					grid[x][y] = new Fox(x, y);
+				} else if (tmp instanceof Mouse) {
+					grid[x][y] = new Mouse(x, y);
+				} else if (tmp instanceof Hawk) {
+					grid[x][y] = new Hawk(x, y);
 				}
 			}
 		}
 	}
 	
 	private void setAnimalWeights() {
-		random.addWeight(5, null);
-		random.addWeight(1, new Rabbit());
+		random.addWeight(20, null);
+		random.addWeight(6, new Rabbit());
+		random.addWeight(2, new Fox());
+		random.addWeight(6, new Mouse());
+		random.addWeight(1, new Hawk());
 	}
 	
 	public void startSimulation(int maxIterations) {
 		System.out.println("--- STARTING SIMULATION ---");
 		for (int i=1; i<=maxIterations; ++i) {
 			System.out.println("---ITERATION " + i + "---");
+			reportPopulationChange();
 			
 			newGrid = new Animal[gridWidth][gridHeight];
 			
@@ -165,21 +222,114 @@ public class Forest {
 			for (Animal[] y : grid) {
 				for (Animal x : y) {
 					try {
+						// If there is no animal here or it is already dead (it has been eaten) then we can skip this location
+						if (x == null || x.isDead()) {
+							continue;
+						}
 						x.turn();
 						if (!x.isDead()) {
 							setAnimal(x);
 						}
 					} catch (IllegalArgumentException e) {
-						System.out.println("Fatal error occured, an animal is not an animal!");
+						System.out.println("Fatal error occured, an Animal is not an Animal!");
+						e.printStackTrace();
 					} catch (NullPointerException e) {
-						// There is no animal in this spot (x.turn() fails), just do nothing but stop the crash
+						// There is no animal in this spot (x.turn() fails), just do nothing but make sure we don't crash
+						System.out.println("Tried to run logic on an Animal that does not exist!");
+						e.printStackTrace();
 					}
 				}
 			}
 			
 			grid = newGrid; // Finally move update the grid
-			printMap();
+			//printMap();
 		}
+		
+		System.out.println("-- FINISHED SIMULATION --");
+	}
+	
+	public boolean procreateAnimal(Animal type, int x, int y) {
+		x = getPositionX(x);
+		y = getPositionY(y);
+		Animal[] AnimalList = getSurroundingAnimals(x, y);
+		boolean procreated = false;
+		int[] newAnimalLoc;
+		
+		for (int i=0; i<AnimalList.length; ++i) {
+			if (AnimalList[i] == null) { // Spot is empty
+				try {
+					newAnimalLoc = surroundingAnimalIndexToGridLocation(i, x, y);
+				} catch (IllegalArgumentException e) {
+					System.out.println("Failed to procreate: " + e.getMessage());
+					return false;
+				}
+				
+				if (type instanceof Rabbit) {
+					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = new Rabbit(newAnimalLoc[0], newAnimalLoc[1]);
+					procreated = true;
+					break;
+				} else if (type instanceof Fox) {
+					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = new Fox(newAnimalLoc[0], newAnimalLoc[1]);
+					procreated = true;
+					break;
+				} else if (type instanceof Mouse) {
+					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = new Mouse(newAnimalLoc[0], newAnimalLoc[1]);
+					procreated = true;
+					break;
+				} else if (type instanceof Hawk) {
+					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = new Hawk(newAnimalLoc[0], newAnimalLoc[1]);
+					procreated = true;
+					break;
+				}
+			}
+		}
+		
+		return procreated;
+	}
+	
+	public Animal eatAnimal(int eaterX, int eaterY, int victimX, int victimY) {
+		Animal eater = getAnimalAtPosition(eaterX, eaterY);
+		Animal victim = getAnimalAtPosition(victimX, victimY);
+		
+		if (eater instanceof Predator) {
+			// TODO check this logic!
+			victim.die();
+			//eater.setX(victim.getX());
+			//eater.setY(victim.getY());
+			//newGrid[victim.getX()][victim.getY()] = eater;
+			//grid[eater.getX()][eater.getY()] = eater; 
+		}
+		
+		return victim;
+	}
+	
+	public void reportPopulationChange() {
+		int newRabbitCount = 0, newFoxCount = 0, newMouseCount = 0, newHawkCount = 0;
+		
+		for (Animal[] y : grid) {
+			for (Animal x : y) {
+				if (x instanceof Rabbit)
+					newRabbitCount++;
+				else if (x instanceof Fox)
+					newFoxCount++;
+				else if (x instanceof Mouse)
+					newMouseCount++;
+				else if (x instanceof Hawk)
+					newHawkCount++;
+			}
+		}
+		
+		System.out.println("\tTotal\tChange");
+		System.out.format("Rabbits\t%d\t%d%n", newRabbitCount, newRabbitCount-rabbitCount);
+		System.out.format("Foxes\t%d\t%d%n", newFoxCount, newFoxCount-foxCount);
+		System.out.format("Mice\t%d\t%d%n", newMouseCount, newMouseCount-mouseCount);
+		System.out.format("Hawks\t%d\t%d%n", newHawkCount, newHawkCount-hawkCount);
+		System.out.println();
+		
+		rabbitCount = newRabbitCount;
+		foxCount = newFoxCount;
+		mouseCount = newMouseCount;
+		hawkCount = newHawkCount;
 	}
 	
 	@Override

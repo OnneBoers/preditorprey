@@ -27,6 +27,12 @@ public abstract class Animal {
 		this.energy = energy; 
 	}
 	
+	public void lowerEnergy() {
+		energy--;
+		if (energy == 0) 
+			die();
+	}
+	
 	public int getX() {
 		return x;
 	}
@@ -54,8 +60,8 @@ public abstract class Animal {
 		dead = true;
 	}
 	
-	public void procreate() {
-		// TODO implement
+	public boolean procreate() {
+		return Main.forest.procreateAnimal(this, x, y);
 	}
 	
 	public abstract String printCharacter();
