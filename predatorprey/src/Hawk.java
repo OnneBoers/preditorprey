@@ -11,13 +11,13 @@
  *
  */
 public class Hawk extends Predator implements MovableAnimal {
-	private final int HAWK_ENERGY = 50;
+	private final int HAWK_ENERGY = 40;
 	private final int HAWK_ENERGY_DIST = 10;
 	private final int HAWK_PROCREATION_AGE_START = 15;
 	private final int HAWK_PROCREATION_AGE_END = 45;
 	private final int HAWK_MAX_PROCREATION_COUNT = 1;
 	private final int HAWK_MAX_EAT_COUNT = 2;
-	private final double HAWK_2ND_PROCREATION_CHANCE = 0.0025;
+	private final double HAWK_2ND_PROCREATION_CHANCE = 0.01;
 	private final int HAWK_FIGHT_COST = 1;
 	
 	private int startEnergy;
@@ -58,7 +58,7 @@ public class Hawk extends Predator implements MovableAnimal {
 		}
 		
 		if (animalsEaten == 0)
-			Main.forest.moveAnimal(getX(), getY(), getX()+Main.forest.getRandom().nextInt(2)-1, getY()+Main.forest.getRandom().nextInt(2)-1);
+			Main.forest.moveAnimal(getX(), getY(), getX()+Main.forest.getRandom().nextInt(3)-1, getY()+Main.forest.getRandom().nextInt(3)-1);
 		
 		if (hasMetHawk && (startEnergy-getEnergy()) > HAWK_PROCREATION_AGE_START && (startEnergy-getEnergy() < HAWK_PROCREATION_AGE_END)) {
 			if (procreationCount < HAWK_MAX_PROCREATION_COUNT && procreate())
