@@ -11,7 +11,7 @@ public class Main {
 		Main.forest = new Forest(100, 200, -1);
 		Main.forest.generateInitialForest();
 		//Main.forest.printMap();
-		Main.forest.startSimulation(100);
+		Main.forest.startSimulation(1000);
 		//Main.forest.printMap();
 	}
 

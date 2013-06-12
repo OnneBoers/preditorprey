@@ -1,6 +1,11 @@
 import java.util.ArrayList;
 import java.util.Random;
 
+/** Generates random numbers and has the ability to generate animal classes at random according to certain weights
+ * 
+ * @author Xeryus Stokkel
+ *
+ */
 @SuppressWarnings("serial")
 public class WeightedRandom extends Random {
 
@@ -33,7 +38,7 @@ public class WeightedRandom extends Random {
 	
 	/**
 	 * Because we can not use null in the ArrayList we have to use this private class to fake it till we make it.
-	 * @author XeryusTC
+	 * @author Xeryus Stokkel
 	 *
 	 */
 	private class DummyAnimal extends Prey {

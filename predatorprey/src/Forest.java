@@ -179,6 +179,9 @@ public class Forest {
 		newGrid[getPositionX(animal.getX())][getPositionY(animal.getY())] = animal;
 	}
 	
+	/**
+	 * Populates the forest with animals in random possitions.
+	 */
 	public void generateInitialForest() {
 		int x, y;
 		Animal tmp;
@@ -204,7 +207,7 @@ public class Forest {
 	
 	private void setAnimalWeights() {
 		random.addWeight(20, null);
-		random.addWeight(6, new Rabbit());
+		random.addWeight(4, new Rabbit());
 		random.addWeight(2, new Fox());
 		random.addWeight(6, new Mouse());
 		random.addWeight(1, new Hawk());
@@ -248,6 +251,13 @@ public class Forest {
 		System.out.println("-- FINISHED SIMULATION --");
 	}
 	
+	/**
+	 * Creates offspring for animals. It will add the offspring to the forest next to the parent animal in the first available empty field.
+	 * @param type The type of Animal @see Animal
+	 * @param x The x location of the parent
+	 * @param y The y location of the parent
+	 * @return True if there was a space available and offspring has been created.
+	 */
 	public boolean procreateAnimal(Animal type, int x, int y) {
 		x = getPositionX(x);
 		y = getPositionY(y);
@@ -292,17 +302,15 @@ public class Forest {
 		Animal victim = getAnimalAtPosition(victimX, victimY);
 		
 		if (eater instanceof Predator) {
-			// TODO check this logic!
 			victim.die();
-			//eater.setX(victim.getX());
-			//eater.setY(victim.getY());
-			//newGrid[victim.getX()][victim.getY()] = eater;
-			//grid[eater.getX()][eater.getY()] = eater; 
 		}
 		
 		return victim;
 	}
 	
+	/**
+	 * Reports the size and change in population directly to console.
+	 */
 	public void reportPopulationChange() {
 		int newRabbitCount = 0, newFoxCount = 0, newMouseCount = 0, newHawkCount = 0;
 		

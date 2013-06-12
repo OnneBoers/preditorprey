@@ -53,6 +53,9 @@ public abstract class Animal {
 		return dead;
 	}
 	
+	/**
+	 * Holds the logic that allows an animal to do things in its turn. The logic is specific for every kind of animal.
+	 */
 	abstract public void turn();
 	
 	public void die() {

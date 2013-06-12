@@ -1,8 +1,16 @@
-
+/** Implementation of the free to choose prey animal.
+ * 
+ * Mice will flee from the first predator they detect from which they can move in the opposite direction. If this is not possible they will not move.
+ * Mice will reproduce if they have not fled from predators and they are next to another mouse. They only have a chance to reproduce equal to 
+ * MOUSE_PROCREATE_CHANCE and they will only have MOUSE_PROCREATE_LIMIT offspring.
+ * 
+ * @author Xeryus Stokkel and Onne Boers
+ *
+ */
 public class Mouse extends Prey implements MovableAnimal {
 	private final int MOUSE_ENERGY = 5;
 	private final int MOUSE_ENERGY_DIST = 10;
-	private final double MOUSE_PROCREATE_CHANCE = 0.25;
+	private final double MOUSE_PROCREATE_CHANCE = 0.35;
 	private final int MOUSE_PROCREATE_LIMIT = 5;
 	
 	private int procreateCount = 0; 
