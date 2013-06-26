@@ -8,10 +8,10 @@
  *
  */
 public class Mouse extends Prey implements MovableAnimal {
-	private final int MOUSE_ENERGY = 5;
-	private final int MOUSE_ENERGY_DIST = 10;
-	private final double MOUSE_PROCREATE_CHANCE = 0.35;
-	private final int MOUSE_PROCREATE_LIMIT = 5;
+	private final static int MOUSE_ENERGY = 5;
+	private final static int MOUSE_ENERGY_DIST = 10;
+	private final static double MOUSE_PROCREATE_CHANCE = 0.40;
+	private final static int MOUSE_PROCREATE_LIMIT = 5;
 	
 	private int procreateCount = 0; 
 	private boolean hasFlown = false;

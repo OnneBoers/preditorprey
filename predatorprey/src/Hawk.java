@@ -11,14 +11,14 @@
  *
  */
 public class Hawk extends Predator implements MovableAnimal {
-	private final int HAWK_ENERGY = 40;
-	private final int HAWK_ENERGY_DIST = 10;
-	private final int HAWK_PROCREATION_AGE_START = 15;
-	private final int HAWK_PROCREATION_AGE_END = 45;
-	private final int HAWK_MAX_PROCREATION_COUNT = 1;
-	private final int HAWK_MAX_EAT_COUNT = 2;
-	private final double HAWK_2ND_PROCREATION_CHANCE = 0.01;
-	private final int HAWK_FIGHT_COST = 1;
+	private final static int HAWK_ENERGY = 30;
+	private final static int HAWK_ENERGY_DIST = 10;
+	private final static int HAWK_PROCREATION_AGE_START = 15;
+	private final static int HAWK_PROCREATION_AGE_END = 30;
+	private final static int HAWK_MAX_PROCREATION_COUNT = 1;
+	private final static int HAWK_MAX_EAT_COUNT = 2;
+	private final static double HAWK_2ND_PROCREATION_CHANCE = 0.018;
+	private final static int HAWK_FIGHT_COST = 5;
 	
 	private int startEnergy;
 	private int procreationCount = 0;
@@ -47,7 +47,11 @@ public class Hawk extends Predator implements MovableAnimal {
 			if (a instanceof Hawk) {
 				hasMetHawk = true;
 				hasMetRival = true;
-			} else if (a instanceof Prey && animalsEaten < HAWK_MAX_EAT_COUNT) {
+			}
+		}
+		
+		for (Animal a : surroundingAnimals) {
+			if (a instanceof Prey && animalsEaten < HAWK_MAX_EAT_COUNT) {
 				if (a instanceof Mouse && ((Mouse)a).getHasFlown())
 					continue;
 				if (hasMetRival)

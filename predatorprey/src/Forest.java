@@ -10,6 +10,15 @@ import java.awt.image.BufferedImage;
  *
  */
 public class Forest {
+	public final static int FOREST_INITIAL_EMPTY_SPACE_WEIGHT = 30;
+	public final static int FOREST_INITIAL_RABBIT_WEIGHT = 5;
+	public final static int FOREST_INITIAL_FOX_WEIGHT = 3;
+	public final static int FOREST_INITIAL_MOUSE_WEIGHT = 8;
+	public final static int FOREST_INITIAL_HAWK_WEIGHT = 1;
+	public final static String FOREST_GIF_FILENAME = "forest.gif";
+	public final static int FOREST_GIF_FRAMERATE = 15;
+	public final static int FOREST_GIF_ANIMAL_SIZE = 2;
+	
 	/**
 	 * Keep track of all the animals in this grid. 
 	 */
@@ -38,8 +47,8 @@ public class Forest {
 		grid = new Animal[width][height];
 		random = new WeightedRandom(seed);
 		gif = new AnimatedGifEncoder();
-		gif.start("forest.gif");
-		gif.setDelay(100);
+		gif.start(FOREST_GIF_FILENAME);
+		gif.setFrameRate(FOREST_GIF_FRAMERATE);
 	}
 	
 	public Forest() {
@@ -165,11 +174,10 @@ public class Forest {
 				newGrid[newX][newY] = getAnimalAtPosition(oldX, oldY);
 				newGrid[oldX][oldY] = null;
 
-				if (newGrid[newX][newY] instanceof Mouse) {
+				if (newGrid[newX][newY] instanceof Mouse)
 					((Mouse)newGrid[newX][newY]).move(newX, newY);
-				} else if (newGrid[newX][newY] instanceof Hawk) {
+				else if (newGrid[newX][newY] instanceof Hawk)
 					((Hawk)newGrid[newX][newY]).move(newX,  newY);
-				}
 				
 				return true;
 			}
@@ -190,7 +198,7 @@ public class Forest {
 	}
 	
 	/**
-	 * Populates the forest with animals in random possitions.
+	 * Populates the forest with animals in random positions.
 	 */
 	public void generateInitialForest() {
 		int x, y;
@@ -202,37 +210,34 @@ public class Forest {
 			for (x=0; x<getGridWidth(); ++x) {
 				tmp = random.nextAnimal();
 				
-				if (tmp instanceof Rabbit) {
-					grid[x][y] = new Rabbit(x, y);
-				} else if (tmp instanceof Fox) {
-					grid[x][y] = new Fox(x, y);
-				} else if (tmp instanceof Mouse) {
-					grid[x][y] = new Mouse(x, y);
-				} else if (tmp instanceof Hawk) {
-					grid[x][y] = new Hawk(x, y);
+				try {
+					grid[x][y] = tmp.getClass().newInstance();
+					grid[x][y].setX(x);
+					grid[x][y].setY(y);
+				} catch (NullPointerException ex) {
+					// Don't do anything, this is to be expected when a square is suppose to be empty
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
 			}
 		}
 	}
 	
 	private void setAnimalWeights() {
-		random.addWeight(30, null);
-		random.addWeight(5, new Rabbit());
-		random.addWeight(3, new Fox());
-		random.addWeight(8, new Mouse());
-		random.addWeight(1, new Hawk());
+		random.addWeight(FOREST_INITIAL_EMPTY_SPACE_WEIGHT, null);
+		random.addWeight(FOREST_INITIAL_RABBIT_WEIGHT, new Rabbit());
+		random.addWeight(FOREST_INITIAL_FOX_WEIGHT,    new Fox());
+		random.addWeight(FOREST_INITIAL_MOUSE_WEIGHT,  new Mouse());
+		random.addWeight(FOREST_INITIAL_HAWK_WEIGHT,   new Hawk());
 	}
 	
 	public void startSimulation(int maxIterations) {
 		System.out.println("--- STARTING SIMULATION ---");
 		for (int i=1; i<=maxIterations; ++i) {
 			System.out.println("---ITERATION " + i + "---");
-			reportPopulationChange();
-			addFrameToGif();
 			
 			newGrid = new Animal[gridWidth][gridHeight];
 			
-			// First do all the stuff that does not involve moving
 			for (Animal[] y : grid) {
 				for (Animal x : y) {
 					try {
@@ -255,11 +260,14 @@ public class Forest {
 				}
 			}
 			
-			grid = newGrid; // Finally move update the grid
+			grid = newGrid; // Finally move update to the grid
+			reportPopulationChange();
+			addFrameToGif();
 			//printMap();
 		}
 		
 		System.out.println("-- FINISHED SIMULATION --");
+		addFrameToGif();
 		gif.finish();
 	}
 	
@@ -288,22 +296,14 @@ public class Forest {
 					return false;
 				}
 				
-				if (type instanceof Rabbit) {
-					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = new Rabbit(newAnimalLoc[0], newAnimalLoc[1]);
+				try {
+					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = type.getClass().newInstance();
+					newGrid[newAnimalLoc[0]][newAnimalLoc[1]].setX(newAnimalLoc[0]);
+					newGrid[newAnimalLoc[0]][newAnimalLoc[1]].setY(newAnimalLoc[1]);
 					procreated = true;
 					break;
-				} else if (type instanceof Fox) {
-					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = new Fox(newAnimalLoc[0], newAnimalLoc[1]);
-					procreated = true;
-					break;
-				} else if (type instanceof Mouse) {
-					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = new Mouse(newAnimalLoc[0], newAnimalLoc[1]);
-					procreated = true;
-					break;
-				} else if (type instanceof Hawk) {
-					newGrid[newAnimalLoc[0]][newAnimalLoc[1]] = new Hawk(newAnimalLoc[0], newAnimalLoc[1]);
-					procreated = true;
-					break;
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
 			}
 		}
@@ -326,7 +326,8 @@ public class Forest {
 	 * Reports the size and change in population directly to console.
 	 */
 	private void reportPopulationChange() {
-		int newRabbitCount = 0, newFoxCount = 0, newMouseCount = 0, newHawkCount = 0;
+		int newRabbitCount = 0, newFoxCount = 0, newMouseCount = 0, newHawkCount = 0,
+				rabbitChange =0, foxChange = 0, mouseChange = 0, hawkChange = 0;
 		
 		for (Animal[] y : grid) {
 			for (Animal x : y) {
@@ -341,11 +342,18 @@ public class Forest {
 			}
 		}
 		
+		rabbitChange = newRabbitCount - rabbitCount;
+		foxChange    = newFoxCount - foxCount;
+		mouseChange  = newMouseCount - mouseCount;
+		hawkChange   = newHawkCount - hawkCount;
+		
 		System.out.println("\tTotal\tChange");
-		System.out.format("Rabbits\t%d\t%d%n", newRabbitCount, newRabbitCount-rabbitCount);
-		System.out.format("Foxes\t%d\t%d%n", newFoxCount, newFoxCount-foxCount);
-		System.out.format("Mice\t%d\t%d%n", newMouseCount, newMouseCount-mouseCount);
-		System.out.format("Hawks\t%d\t%d%n", newHawkCount, newHawkCount-hawkCount);
+		System.out.format("Rabbits\t%d\t%d%n", newRabbitCount, rabbitChange);
+		System.out.format("Foxes\t%d\t%d%n", newFoxCount, foxChange);
+		System.out.format("Mice\t%d\t%d%n", newMouseCount, mouseChange);
+		System.out.format("Hawks\t%d\t%d%n", newHawkCount, hawkChange);
+		System.out.format("Total\t%d\t%d%n", newRabbitCount + newFoxCount + newMouseCount + newHawkCount,
+				rabbitChange + foxChange + mouseChange + hawkChange);
 		System.out.println();
 		
 		rabbitCount = newRabbitCount;
@@ -355,28 +363,29 @@ public class Forest {
 	}
 	
 	private void addFrameToGif() {
-		final int ANIMAL_SIZE = 2;
-		BufferedImage bi = new BufferedImage(getGridWidth()*ANIMAL_SIZE, getGridHeight()*ANIMAL_SIZE, java.awt.image.BufferedImage.TYPE_3BYTE_BGR);
+		BufferedImage bi = new BufferedImage(getGridWidth() * FOREST_GIF_ANIMAL_SIZE,
+				getGridHeight() * FOREST_GIF_ANIMAL_SIZE,
+				java.awt.image.BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D g = bi.createGraphics();
 		
 		// Set the background color to white
 		g.setColor(Color.WHITE);
-		g.fill(new Rectangle(0, 0, getGridWidth()*ANIMAL_SIZE, getGridHeight()*ANIMAL_SIZE));
+		g.fill(new Rectangle(0, 0, getGridWidth()*FOREST_GIF_ANIMAL_SIZE, getGridHeight()*FOREST_GIF_ANIMAL_SIZE));
 		
 		for (Animal[] y: grid) {
 			for (Animal a: y) {
 				if (a instanceof Rabbit) {
 					g.setColor(Color.RED);
-					g.fill(new Rectangle(a.getX()*ANIMAL_SIZE, a.getY()*ANIMAL_SIZE, ANIMAL_SIZE, ANIMAL_SIZE));
+					g.fill(new Rectangle(a.getX()*FOREST_GIF_ANIMAL_SIZE, a.getY()*FOREST_GIF_ANIMAL_SIZE, FOREST_GIF_ANIMAL_SIZE, FOREST_GIF_ANIMAL_SIZE));
 				} else if (a instanceof Fox) {
 					g.setColor(Color.GREEN);
-					g.fill(new Rectangle(a.getX()*ANIMAL_SIZE, a.getY()*ANIMAL_SIZE, ANIMAL_SIZE, ANIMAL_SIZE));
+					g.fill(new Rectangle(a.getX()*FOREST_GIF_ANIMAL_SIZE, a.getY()*FOREST_GIF_ANIMAL_SIZE, FOREST_GIF_ANIMAL_SIZE, FOREST_GIF_ANIMAL_SIZE));
 				} else if (a instanceof Mouse) {
 					g.setColor(Color.BLUE);
-					g.fill(new Rectangle(a.getX()*ANIMAL_SIZE, a.getY()*ANIMAL_SIZE, ANIMAL_SIZE, ANIMAL_SIZE));
+					g.fill(new Rectangle(a.getX()*FOREST_GIF_ANIMAL_SIZE, a.getY()*FOREST_GIF_ANIMAL_SIZE, FOREST_GIF_ANIMAL_SIZE, FOREST_GIF_ANIMAL_SIZE));
 				} else if (a instanceof Hawk) {
-					g.setColor(Color.BLACK);
-					g.fill(new Rectangle(a.getX()*ANIMAL_SIZE, a.getY()*ANIMAL_SIZE, ANIMAL_SIZE, ANIMAL_SIZE));
+					g.setColor(Color.LIGHT_GRAY);
+					g.fill(new Rectangle(a.getX()*FOREST_GIF_ANIMAL_SIZE, a.getY()*FOREST_GIF_ANIMAL_SIZE, FOREST_GIF_ANIMAL_SIZE, FOREST_GIF_ANIMAL_SIZE));
 				}
 			}
 		}

@@ -45,9 +45,8 @@ public class WeightedRandom extends Random {
 		public DummyAnimal() {
 			super();
 		}
-		public void turn() {
-			
-		}  
+		
+		public void turn() {}  
 		
 		public String printCharacter() {
 			return "x"; 
