@@ -1,9 +1,17 @@
-
+/** Implementation of the required fox.
+ * 
+ * Foxes have a standard energy of FOX_ENERGY and can only reproduce in a time since FOX_LAST_EATEN_LIMIT.
+ * They are also limited to eating a maximum of FOX_MAX_EAT_COUT of prey per turn and can only have
+ * FOX_MAX_PROCREATION_COUNT offspring. 
+ * 
+ * @author Xeryus Stokkel and Onne Boers
+ *
+ */
 public class Fox extends Predator {
-	private final int FOX_ENERGY = 20;
-	private final int FOX_LAST_EATEN_LIMIT = 5;
-	private final int FOX_MAX_PROCREATION_COUNT = 2;
-	private final int FOX_MAX_EAT_COUNT = 2;
+	private final static int FOX_ENERGY = 20;
+	private final static int FOX_LAST_EATEN_LIMIT = 5;
+	private final static int FOX_MAX_PROCREATION_COUNT = 2;
+	private final static int FOX_MAX_EAT_COUNT = 2;
 	
 	private int lastEaten = 0;
 	private int procreationCount = 0;
@@ -41,8 +49,9 @@ public class Fox extends Predator {
 			if (procreate())
 				procreationCount++;
 		}
-		
+				
 		lowerEnergy();
+		lastEaten--;
 	}
 	
 	public void setLastEaten(int last) {

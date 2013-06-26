@@ -1,6 +1,9 @@
-/**
- * Implementation of the required Rabbit
- * @author Xeryus Stokkel
+/** Implementation of the required Rabbit.
+ * 
+ * Rabbits reproduce whenever they are next to another rabbit. If they are not next to another rabbit they will die.
+ * Rabbits have a maximum reproduction count of RABBIT_MAX_PROCREATION_COUNT to keep their population in check.
+ * 
+ * @author Xeryus Stokkel and Onne Boers
  *
  */
 public class Rabbit extends Prey {
